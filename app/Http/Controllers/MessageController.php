@@ -13,7 +13,7 @@ class MessageController extends Controller
      */
     public function index()
     {
-        return Message::latest()->get();
+        return Message::oldest()->get();
     }
 
     /**
