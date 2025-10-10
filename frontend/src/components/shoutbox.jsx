@@ -19,6 +19,10 @@ export default function Shoutbox() {
         fetchMessages();
     }, []);
 
+    useEffect(() => {
+        localStorage.setItem("username", username);
+    }, [username]);
+
     // Refresh every 5 seconds (simulating real time)
     useEffect(() => {
         const interval = setInterval(() => {
@@ -29,19 +33,28 @@ export default function Shoutbox() {
     }, []);
 
     const fetchMessages = async () => {
-        const response = await axios.get(`${API_URL}/messages`);
+        const {
+            data: { data },
+        } = await axios.get(`${API_URL}/messages`);
 
-        setMessages(response.data);
+        setMessages(data);
     };
 
     const sendMessage = async (e) => {
         e.preventDefault();
 
         try {
-            await axios.post(`${API_URL}/messages`, { username, content });
-            localStorage.setItem("username", username);
+            const {
+                data: { data },
+            } = await axios.post(`${API_URL}/messages`, {
+                username,
+                content,
+            });
+
             setContent("");
-            fetchMessages();
+            setMessages([...messages, data]);
+
+            // scroll to bottom
             setTimeout(() => {
                 messageEndsRef.current?.scrollIntoView({ behavior: "smooth" });
             }, 100);

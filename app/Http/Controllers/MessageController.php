@@ -13,7 +13,10 @@ class MessageController extends Controller
      */
     public function index()
     {
-        return Message::oldest()->get();
+        return [
+            'success' => true,
+            'data' => Message::oldest()->get(),
+        ];
     }
 
     /**
