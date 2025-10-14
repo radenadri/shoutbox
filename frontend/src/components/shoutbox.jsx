@@ -63,6 +63,8 @@ export default function Shoutbox() {
         }
     };
 
+    const isDisabled = !username || !content;
+
     return (
         <div className="max-w-lg mx-auto mt-10 p-4 border rounded">
             <h1 className="text-xl font-bold mb-4 text-center">💬 Shoutbox</h1>
@@ -104,7 +106,11 @@ export default function Shoutbox() {
                 {errors.content && (
                     <div className="text-red-500">{errors.content}</div>
                 )}
-                <button className="bg-blue-600 text-white px-4 py-2 rounded">
+                <button
+                    type="submit"
+                    disabled={isDisabled}
+                    className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
                     Send
                 </button>
             </form>
