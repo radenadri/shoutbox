@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
-import { API_URL } from "../config";
+import { API_URL, echo } from "../config";
 
 export default function Shoutbox() {
     // Reference to the end of the messages list
@@ -23,14 +23,35 @@ export default function Shoutbox() {
         localStorage.setItem("username", username);
     }, [username]);
 
-    // Refresh every 5 seconds (simulating real time)
     useEffect(() => {
-        const interval = setInterval(() => {
-            fetchMessages();
-        }, 5000);
+        const channel = echo.channel("shoutbox");
 
-        return () => clearInterval(interval);
+        channel.listen(".message.created", (e) => {
+            console.log("✅ Message received :", e);
+            setMessages((prev) => [...prev, e]);
+
+            // Auto scroll
+            setTimeout(() => {
+                messageEndsRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                });
+            }, 100);
+        });
+
+        return () => {
+            console.log("Leaving channel...");
+            echo.leave("shoutbox");
+        };
     }, []);
+
+    // Refresh every 5 seconds (simulating real time)
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         fetchMessages();
+    //     }, 5000);
+
+    //     return () => clearInterval(interval);
+    // }, []);
 
     const fetchMessages = async () => {
         const {
@@ -44,20 +65,17 @@ export default function Shoutbox() {
         e.preventDefault();
 
         try {
-            const {
-                data: { data },
-            } = await axios.post(`${API_URL}/messages`, {
+            await axios.post(`${API_URL}/messages`, {
                 username,
                 content,
             });
 
             setContent("");
-            setMessages([...messages, data]);
 
-            // scroll to bottom
-            setTimeout(() => {
-                messageEndsRef.current?.scrollIntoView({ behavior: "smooth" });
-            }, 100);
+            // setMessages([...messages, data]);
+            // setTimeout(() => {
+            //     messageEndsRef.current?.scrollIntoView({ behavior: "smooth" });
+            // }, 100);
         } catch (error) {
             setErrors(error.response.data.errors);
         }

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MessageCreated;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class MessageController extends Controller
@@ -40,6 +42,11 @@ class MessageController extends Controller
             'username' => $request->username,
             'content' => $request->content,
         ]);
+
+        // Trigger broadcast event
+        Log::info('Broadcasting message:', $message->toArray());
+        event(new MessageCreated($message));
+        Log::info('Event dispatched');
 
         return response()->json([
             'success' => true,
